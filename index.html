@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NexAI — Discover the Best AI Tools</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<script src="https://js.stripe.com/v3/"></script>
+<style>
+  :root {
+    --bg: #080c12; --surface: #0e1420; --border: rgba(255,255,255,0.07);
+    --accent: #00e5ff; --accent2: #7c3aed; --gold: #f59e0b;
+    --text: #e8edf5; --muted: #64748b; --card: #111827;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background: radial-gradient(ellipse 80% 50% at 10% 0%, rgba(0,229,255,0.07) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 90% 20%, rgba(124,58,237,0.08) 0%, transparent 60%);
+  }
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 40px; height: 64px;
+    background: rgba(8,12,18,0.85); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px; }
+  .logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 32px; align-items: center; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color .2s; }
+  .nav-links a:hover { color: var(--text); }
+  .btn-submit { background: var(--accent); color: #080c12; border: none; cursor: pointer; padding: 8px 20px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 600; transition: opacity .2s; }
+  .btn-submit:hover { opacity: .85; }
+  .hero { position: relative; z-index: 1; text-align: center; padding: 100px 24px 60px; }
+  .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.2); border-radius: 100px; padding: 6px 16px; font-size: 0.8rem; font-weight: 500; color: var(--accent); margin-bottom: 28px; animation: fadeUp .6s ease both; }
+  .hero-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)} }
+  .hero h1 { font-family: 'Syne', sans-serif; font-size: clamp(2.6rem,6vw,4.5rem); font-weight: 800; line-height: 1.05; letter-spacing: -2px; animation: fadeUp .6s .1s ease both; }
+  .hero h1 em { font-style: normal; color: var(--accent); }
+  .hero p { max-width: 520px; margin: 20px auto 0; color: var(--muted); font-size: 1.1rem; line-height: 1.7; animation: fadeUp .6s .2s ease both; }
+  .hero-search { display: flex; max-width: 520px; margin: 40px auto 0; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; animation: fadeUp .6s .3s ease both; transition: border-color .2s; }
+  .hero-search:focus-within { border-color: rgba(0,229,255,0.4); }
+  .hero-search input { flex: 1; background: transparent; border: none; outline: none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.95rem; padding: 14px 18px; }
+  .hero-search input::placeholder { color: var(--muted); }
+  .hero-search button { background: var(--accent); border: none; cursor: pointer; color: #080c12; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.875rem; padding: 0 24px; }
+  .hero-stats { display: flex; gap: 40px; justify-content: center; margin-top: 48px; animation: fadeUp .6s .4s ease both; }
+  .stat { text-align: center; }
+  .stat-num { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; display: block; }
+  .stat-label { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+  .section { position: relative; z-index: 1; padding: 0 40px 60px; max-width: 1200px; margin: 0 auto; }
+  .section-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 24px; }
+  .section-title { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 700; letter-spacing: -0.5px; }
+  .section-link { color: var(--accent); font-size: 0.875rem; text-decoration: none; }
+  .categories { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 40px; }
+  .cat-pill { background: var(--surface); border: 1px solid var(--border); border-radius: 100px; padding: 7px 16px; font-size: 0.83rem; font-weight: 500; color: var(--muted); cursor: pointer; transition: all .2s; }
+  .cat-pill:hover,.cat-pill.active { background: rgba(0,229,255,0.1); border-color: rgba(0,229,255,0.3); color: var(--accent); }
+  .tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 20px; }
+  .tool-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; position: relative; cursor: pointer; transition: border-color .2s, transform .2s, box-shadow .2s; animation: fadeUp .5s ease both; }
+  .tool-card:hover { border-color: rgba(0,229,255,0.25); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+  .tool-card.featured { border-color: rgba(245,158,11,0.35); background: linear-gradient(135deg,#111827,#13111f); }
+  .tool-card.featured:hover { border-color: rgba(245,158,11,0.6); }
+  .badge-featured { position: absolute; top: 16px; right: 16px; background: linear-gradient(135deg,#f59e0b,#d97706); color: #000; font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 100px; text-transform: uppercase; }
+  .tool-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 14px; }
+  .tool-name { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 6px; }
+  .tool-desc { font-size: 0.875rem; color: var(--muted); line-height: 1.6; margin-bottom: 16px; }
+  .tool-footer { display: flex; align-items: center; justify-content: space-between; }
+  .tool-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag { background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 6px; font-size: 0.75rem; color: var(--muted); padding: 3px 8px; }
+  .tool-visits { font-size: 0.78rem; color: var(--muted); }
+
+  /* ── PRICING ── */
+  .pricing-section { position: relative; z-index: 1; padding: 80px 40px; background: linear-gradient(180deg,transparent,rgba(14,20,32,0.8),transparent); }
+  .pricing-title { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; text-align: center; letter-spacing: -1px; margin-bottom: 8px; }
+  .pricing-sub { text-align: center; color: var(--muted); font-size: 0.95rem; margin-bottom: 48px; }
+  .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 20px; max-width: 900px; margin: 0 auto; }
+  .price-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 32px; transition: transform .2s; }
+  .price-card:hover { transform: translateY(-4px); }
+  .price-card.popular { border-color: rgba(0,229,255,0.4); background: linear-gradient(135deg,#0e1420,#0a1628); position: relative; }
+  .popular-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #080c12; font-size: 0.72rem; font-weight: 700; padding: 4px 14px; border-radius: 100px; white-space: nowrap; }
+  .plan-name { font-family: 'Syne', sans-serif; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 16px; }
+  .plan-price { font-family: 'Syne', sans-serif; font-size: 2.8rem; font-weight: 800; line-height: 1; }
+  .plan-price span { font-size: 1rem; color: var(--muted); font-weight: 400; }
+  .plan-desc { color: var(--muted); font-size: 0.85rem; margin: 10px 0 24px; }
+  .plan-features { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
+  .plan-features li { font-size: 0.875rem; color: var(--muted); display: flex; align-items: center; gap: 10px; }
+  .plan-features li::before { content: '✓'; color: var(--accent); font-weight: 700; font-size: 0.8rem; }
+  .plan-features li.no::before { content: '✕'; color: #374151; }
+  .plan-features li.no { color: #374151; }
+  .btn-plan { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: transparent; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-plan:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-plan.primary { background: var(--accent); color: #080c12; border-color: var(--accent); }
+  .btn-plan.primary:hover { opacity: .85; }
+  .btn-plan:disabled { opacity: .5; cursor: not-allowed; }
+  .spinner { width: 16px; height: 16px; border: 2px solid rgba(0,0,0,0.2); border-top-color: #080c12; border-radius: 50%; animation: spin .6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── MODAL ── */
+  .modal-overlay { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(8,12,18,0.85); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 24px; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 40px; width: 100%; max-width: 480px; animation: fadeUp .3s ease; }
+  .modal h2 { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; margin-bottom: 6px; }
+  .modal p { color: var(--muted); font-size: 0.875rem; margin-bottom: 28px; }
+  .form-group { margin-bottom: 18px; }
+  .form-group label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--muted); margin-bottom: 7px; text-transform: uppercase; letter-spacing: .5px; }
+  .form-group input, .form-group textarea, .form-group select { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; padding: 11px 14px; outline: none; transition: border-color .2s; }
+  .form-group input:focus, .form-group textarea:focus { border-color: rgba(0,229,255,0.4); }
+  .form-group textarea { resize: vertical; min-height: 90px; }
+  .form-group select option { background: var(--card); }
+  .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
+  .btn-cancel { flex: 1; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 600; transition: all .2s; }
+  .btn-cancel:hover { color: var(--text); }
+
+  /* ── CHECKOUT MODAL ── */
+  .checkout-modal { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 40px; width: 100%; max-width: 420px; animation: fadeUp .3s ease; text-align: center; }
+  .checkout-plan-name { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; margin: 16px 0 6px; }
+  .checkout-price { font-size: 2.2rem; font-weight: 800; font-family: 'Syne', sans-serif; color: var(--accent); margin-bottom: 24px; }
+  .checkout-price span { font-size: 1rem; color: var(--muted); font-weight: 400; }
+  #checkoutEmail { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; padding: 12px 14px; outline: none; margin-bottom: 16px; transition: border-color .2s; }
+  #checkoutEmail:focus { border-color: rgba(0,229,255,0.4); }
+  .stripe-badge { font-size: 0.78rem; color: var(--muted); margin-top: 14px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+
+  /* ── TOAST ── */
+  .toast { position: fixed; bottom: 32px; right: 32px; z-index: 300; background: #1a2535; border: 1px solid rgba(0,229,255,0.3); border-radius: 12px; padding: 14px 20px; font-size: 0.875rem; color: var(--text); display: flex; align-items: center; gap: 10px; opacity: 0; pointer-events: none; transform: translateY(10px); transition: all .3s; }
+  .toast.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
+  .toast .check { color: var(--accent); font-size: 1.1rem; }
+
+  footer { position: relative; z-index: 1; border-top: 1px solid var(--border); padding: 40px; display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-size: 0.85rem; max-width: 1200px; margin: 0 auto; }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Nex<span>AI</span></div>
+  <div class="nav-links">
+    <a href="#">Browse</a>
+    <a href="#pricing">Pricing</a>
+    <button class="btn-submit" onclick="openModal()">+ Submit Tool</button>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-badge"><span class="dot"></span> 1,200+ AI tools listed</div>
+  <h1>Find the Perfect<br><em>AI Tool</em> for You</h1>
+  <p>The largest curated directory of AI tools. Submit yours and reach thousands of users every day.</p>
+  <div class="hero-search">
+    <input id="searchInput" type="text" placeholder="Search AI tools… e.g. image, coding, writing"/>
+    <button onclick="applyFilters()">Search</button>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-num" id="c1">0</span><div class="stat-label">Tools Listed</div></div>
+    <div class="stat"><span class="stat-num" id="c2">0</span><div class="stat-label">Categories</div></div>
+    <div class="stat"><span class="stat-num" id="c3">0</span><div class="stat-label">Monthly Visits</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-header"><div class="section-title">Browse by Category</div></div>
+  <div class="categories">
+    <div class="cat-pill active" onclick="filterCat(this,'all')">All</div>
+    <div class="cat-pill" onclick="filterCat(this,'writing')">✍️ Writing</div>
+    <div class="cat-pill" onclick="filterCat(this,'image')">🎨 Image</div>
+    <div class="cat-pill" onclick="filterCat(this,'coding')">💻 Coding</div>
+    <div class="cat-pill" onclick="filterCat(this,'video')">🎬 Video</div>
+    <div class="cat-pill" onclick="filterCat(this,'productivity')">⚡ Productivity</div>
+    <div class="cat-pill" onclick="filterCat(this,'audio')">🎵 Audio</div>
+    <div class="cat-pill" onclick="filterCat(this,'data')">📊 Data</div>
+  </div>
+  <div class="section-header">
+    <div class="section-title">Featured Tools</div>
+    <a href="#" class="section-link">View all →</a>
+  </div>
+  <div class="tools-grid" id="toolsGrid"></div>
+</div>
+
+<!-- PRICING -->
+<div class="pricing-section" id="pricing">
+  <div class="pricing-title">List Your AI Tool</div>
+  <div class="pricing-sub">Start free, upgrade when you're ready to grow</div>
+  <div class="pricing-grid">
+    <div class="price-card">
+      <div class="plan-name">Free</div>
+      <div class="plan-price">$0 <span>/mo</span></div>
+      <div class="plan-desc">Get discovered at no cost</div>
+      <ul class="plan-features">
+        <li>Basic listing page</li>
+        <li>Listed in directory</li>
+        <li>1 screenshot</li>
+        <li class="no">Featured placement</li>
+        <li class="no">Analytics dashboard</li>
+        <li class="no">Homepage spotlight</li>
+      </ul>
+      <button class="btn-plan" onclick="openModal()">Submit Free</button>
+    </div>
+    <div class="price-card popular">
+      <div class="popular-badge">⭐ Most Popular</div>
+      <div class="plan-name">Pro</div>
+      <div class="plan-price">$19 <span>/mo</span></div>
+      <div class="plan-desc">Get featured, get more clicks</div>
+      <ul class="plan-features">
+        <li>Everything in Free</li>
+        <li>Featured badge + placement</li>
+        <li>Up to 5 screenshots</li>
+        <li>Analytics dashboard</li>
+        <li>Priority support</li>
+        <li class="no">Homepage spotlight</li>
+      </ul>
+      <button class="btn-plan primary" id="btn-pro" onclick="startCheckout('pro')">
+        Get Pro →
+      </button>
+    </div>
+    <div class="price-card">
+      <div class="plan-name">Spotlight</div>
+      <div class="plan-price">$49 <span>/mo</span></div>
+      <div class="plan-desc">Maximum visibility</div>
+      <ul class="plan-features">
+        <li>Everything in Pro</li>
+        <li>Homepage spotlight</li>
+        <li>Newsletter feature</li>
+        <li>Social media shoutout</li>
+        <li>Dedicated support</li>
+        <li>Dofollow backlink</li>
+      </ul>
+      <button class="btn-plan" id="btn-spotlight" onclick="startCheckout('spotlight')">
+        Go Spotlight
+      </button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div>© 2026 <strong>NexAI</strong> — The AI Tools Directory</div>
+  <div style="display:flex;gap:24px;">
+    <a href="#">About</a><a href="#">Contact</a><a href="#">Privacy</a>
+  </div>
+</footer>
+
+<!-- SUBMIT MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h2>Submit Your AI Tool</h2>
+    <p>Free listing goes live within 24 hours.</p>
+    <div class="form-group"><label>Tool Name</label><input type="text" id="toolName" placeholder="e.g. MagicWrite AI"/></div>
+    <div class="form-group"><label>Website URL</label><input type="url" placeholder="https://yourtool.com"/></div>
+    <div class="form-group"><label>Category</label>
+      <select>
+        <option>✍️ Writing</option><option>🎨 Image Generation</option>
+        <option>💻 Coding</option><option>🎬 Video</option>
+        <option>⚡ Productivity</option><option>🎵 Audio</option><option>📊 Data</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Description</label><textarea placeholder="What does your tool do in 1–2 sentences?"></textarea></div>
+    <div class="form-group"><label>Your Email</label><input type="email" id="submitEmail" placeholder="you@company.com"/></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-plan primary" style="flex:2" onclick="submitTool()">Submit Free →</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHECKOUT MODAL -->
+<div class="modal-overlay" id="checkoutModal">
+  <div class="checkout-modal">
+    <div style="font-size:2.5rem">💳</div>
+    <div class="checkout-plan-name" id="checkoutPlanName">Pro Plan</div>
+    <div class="checkout-price" id="checkoutPlanPrice">$19 <span>/month</span></div>
+    <input id="checkoutEmail" type="email" placeholder="Your email address"/>
+    <button class="btn-plan primary" id="checkoutBtn" onclick="goToStripe()">
+      Continue to Payment →
+    </button>
+    <button class="btn-cancel" style="margin-top:10px;width:100%" onclick="closeCheckout()">Cancel</button>
+    <div class="stripe-badge">🔒 Secured by <strong>Stripe</strong> · Cancel anytime</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span class="check">✓</span> <span id="toastMsg">Done!</span></div>
+
+<script>
+const STRIPE_PK = "pk_test_51T6JjbA5kzAyJxDXPRgt5tCAl736iKOoH6YjG9XLLfxk9wdctgVxa8R1WM7EiYrPzUIHBRoSX9h3daeEoDhEjkc500qOvXb0gD";
+const API_URL = "http://localhost:3000"; // Change to your deployed URL in production
+
+const TOOLS = [
+  { name:"Jasper AI", desc:"The #1 AI writing assistant for marketers. Generate blog posts, ads, and emails in seconds.", cat:"writing", icon:"✍️", color:"#1e3a5f", tags:["Writing","Marketing"], visits:"2.4M", featured:true },
+  { name:"Midjourney", desc:"Create stunning AI-generated images from text prompts. Used by artists & designers worldwide.", cat:"image", icon:"🎨", color:"#3b1f5e", tags:["Image","Art"], visits:"8.1M", featured:true },
+  { name:"GitHub Copilot", desc:"AI pair programmer that suggests code completions and entire functions as you type.", cat:"coding", icon:"💻", color:"#1a3a2a", tags:["Coding","Dev"], visits:"5.3M", featured:true },
+  { name:"Runway ML", desc:"Next-gen video creation suite powered by AI. Edit, generate, and transform videos easily.", cat:"video", icon:"🎬", color:"#3a1a1a", tags:["Video","Creative"], visits:"1.2M", featured:false },
+  { name:"Notion AI", desc:"Supercharge your productivity with built-in AI writing, summarization, and brainstorming.", cat:"productivity", icon:"⚡", color:"#1a2a3a", tags:["Productivity","Notes"], visits:"3.7M", featured:false },
+  { name:"ElevenLabs", desc:"Ultra-realistic AI voice synthesis. Clone voices, generate narrations, build audio products.", cat:"audio", icon:"🎵", color:"#2a1a3a", tags:["Audio","Voice"], visits:"900K", featured:true },
+  { name:"Julius AI", desc:"Chat with your data. Upload spreadsheets and ask questions in plain English.", cat:"data", icon:"📊", color:"#1a2a1a", tags:["Data","Analytics"], visits:"450K", featured:false },
+  { name:"Copy.ai", desc:"Generate marketing copy, product descriptions, and social posts with AI instantly.", cat:"writing", icon:"✍️", color:"#2a2a1a", tags:["Writing","Copy"], visits:"1.8M", featured:false },
+];
+
+let currentCat = 'all';
+let selectedPlan = null;
+
+function renderTools(tools) {
+  const grid = document.getElementById('toolsGrid');
+  grid.innerHTML = '';
+  tools.forEach((t, i) => {
+    const card = document.createElement('div');
+    card.className = 'tool-card' + (t.featured ? ' featured' : '');
+    card.style.animationDelay = (i * 0.06) + 's';
+    card.innerHTML = `
+      ${t.featured ? '<div class="badge-featured">⭐ Featured</div>' : ''}
+      <div class="tool-icon" style="background:${t.color}">${t.icon}</div>
+      <div class="tool-name">${t.name}</div>
+      <div class="tool-desc">${t.desc}</div>
+      <div class="tool-footer">
+        <div class="tool-tags">${t.tags.map(tg=>`<span class="tag">${tg}</span>`).join('')}</div>
+        <div class="tool-visits">👁 ${t.visits}</div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function filterCat(el, cat) {
+  currentCat = cat;
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  applyFilters();
+}
+
+function applyFilters() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  let filtered = TOOLS;
+  if (currentCat !== 'all') filtered = filtered.filter(t => t.cat === currentCat);
+  if (q) filtered = filtered.filter(t =>
+    t.name.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q)
+  );
+  renderTools(filtered);
+}
+
+document.getElementById('searchInput').addEventListener('keydown', e => { if(e.key==='Enter') applyFilters(); });
+
+// Counter animation
+function animateCount(id, target) {
+  let cur = 0; const step = target / 60;
+  const el = document.getElementById(id);
+  const iv = setInterval(() => {
+    cur = Math.min(cur + step, target);
+    el.textContent = Math.floor(cur).toLocaleString();
+    if (cur >= target) clearInterval(iv);
+  }, 20);
+}
+setTimeout(() => { animateCount('c1',1247); animateCount('c2',42); animateCount('c3',85000); }, 400);
+
+// Submit modal
+function openModal() { document.getElementById('modal').classList.add('open'); }
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+document.getElementById('modal').addEventListener('click', e => { if(e.target===document.getElementById('modal')) closeModal(); });
+
+function submitTool() {
+  closeModal();
+  showToast('✓ Tool submitted! We\'ll review within 24h.');
+}
+
+// Stripe Checkout
+function startCheckout(plan) {
+  selectedPlan = plan;
+  const plans = { pro: { name: 'Pro Plan', price: '$19 <span>/month</span>' }, spotlight: { name: 'Spotlight Plan', price: '$49 <span>/month</span>' } };
+  document.getElementById('checkoutPlanName').textContent = plans[plan].name;
+  document.getElementById('checkoutPlanPrice').innerHTML = plans[plan].price;
+  document.getElementById('checkoutModal').classList.add('open');
+}
+
+function closeCheckout() {
+  document.getElementById('checkoutModal').classList.remove('open');
+  selectedPlan = null;
+}
+
+document.getElementById('checkoutModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('checkoutModal')) closeCheckout();
+});
+
+async function goToStripe() {
+  const email = document.getElementById('checkoutEmail').value;
+  const toolName = document.getElementById('toolName')?.value || '';
+  const btn = document.getElementById('checkoutBtn');
+
+  if (!email || !email.includes('@')) {
+    showToast('⚠️ Please enter a valid email first.');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Connecting to Stripe…';
+
+  try {
+    const res = await fetch(`${API_URL}/create-checkout-session`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plan: selectedPlan, email, toolName })
+    });
+
+    if (!res.ok) throw new Error('Server error');
+    const { url } = await res.json();
+    window.location.href = url; // Redirect to Stripe Checkout
+  } catch (err) {
+    console.error(err);
+    showToast('⚠️ Could not connect to payment server. Is it running?');
+    btn.disabled = false;
+    btn.innerHTML = 'Continue to Payment →';
+  }
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 4000);
+}
+
+renderTools(TOOLS);
+</script>
+</body>
+</html>
