@@ -281,7 +281,8 @@
 
 <script>
 const STRIPE_PK = "pk_test_51T6JjbA5kzAyJxDXPRgt5tCAl736iKOoH6YjG9XLLfxk9wdctgVxa8R1WM7EiYrPzUIHBRoSX9h3daeEoDhEjkc500qOvXb0gD";
-const API_URL = "http://localhost:3000"; // Change to your deployed URL in production
+const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+const API_URL = isLocal ? `${window.location.protocol}//${window.location.hostname}:3000` : "";
 
 const TOOLS = [
   { name:"Jasper AI", desc:"The #1 AI writing assistant for marketers. Generate blog posts, ads, and emails in seconds.", cat:"writing", icon:"✍️", color:"#1e3a5f", tags:["Writing","Marketing"], visits:"2.4M", featured:true },
